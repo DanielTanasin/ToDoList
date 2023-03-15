@@ -4,6 +4,9 @@ const input = document.querySelector(".form-control");
 const list = document.querySelector(".item-list");
 const btnErase = document.querySelector("#clear-list");
 
+let dataItem = JSON.parse(localStorage.getItem("list")) || [];
+
+
 const addItem = (e) => {
   e.preventDefault();
   let value = input.value;
@@ -14,7 +17,7 @@ const addItem = (e) => {
 
     setTimeout(() => {
       feedback.classList.remove("showItem", "alert-danger");
-    }, 5000);
+    }, 3000);
   } else if (value) {
     let item = document.createElement("div");
     let itemName = document.createElement("h5");
@@ -53,18 +56,33 @@ const addItem = (e) => {
 
     input.value = "";
 
+    dataItem.push(value);
+    console.log(dataItem);
+
+    localStorage.setItem("list", JSON.stringify(dataItem));
+
     iconCorrect.addEventListener("click", () => {
       itemName.classList.add("completed");
       iconCorrect.classList.add("visibility");
     });
     iconEdit.addEventListener("click", () => {
-      item.style.display = "none";
       input.value = itemName.textContent;
+      list.removeChild(item);
+
+      dataItem = dataItem.filter((item) => {
+        return item !== itemName.textContent;
+      });
+      localStorage.setItem("list", JSON.stringify(dataItem));
     });
+
     iconDelete.addEventListener("click", () => {
-      item.style.display = "none";
       feedback.classList.add("showItem", "alert-success");
       feedback.textContent = `Item Deleted`;
+      list.removeChild(item);
+      dataItem = dataItem.filter((item) => {
+        return item !== itemName.textContent;
+      });
+      localStorage.setItem("list", JSON.stringify(dataItem));
 
       setTimeout(() => {
         feedback.classList.remove("showItem", "alert-success");
@@ -76,8 +94,16 @@ const addItem = (e) => {
 console.log(list);
 
 const erase = () => {
-  list.innerHTML = "";
+  const items = list.querySelectorAll(".item");
   input.value = "";
+  dataItem = [];
+
+  if (items.length > 0) {
+    items.forEach((item) => {
+      list.removeChild(item);
+    });
+  }
+  localStorage.removeItem("list");
 };
 
 btn.addEventListener("click", addItem);
